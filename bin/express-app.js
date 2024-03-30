@@ -4,8 +4,9 @@ const { program } = require('commander');
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
-const chalk = require('chalk');
-const inquirer = require('inquirer');
+
+// Use dynamic import for chalk
+const chalkPromise = import('chalk');
 
 program
   .version('1.0.0')
@@ -19,6 +20,7 @@ const run = async () => {
   let appDirectory = program.directory || appName;
 
   if (!appName) {
+    const inquirer = await import('inquirer');
     const { name } = await inquirer.prompt([
       {
         type: 'input',
@@ -39,6 +41,7 @@ const run = async () => {
   const appPath = path.join(process.cwd(), appDirectory);
 
   if (fs.existsSync(appPath)) {
+    const chalk = await chalkPromise;
     console.error(chalk.red(`Error: Directory ${appDirectory} already exists.`));
     process.exit(1);
   }
@@ -60,6 +63,7 @@ const run = async () => {
   copyTemplateFiles(templatePath, appPath);
   process.chdir(appPath);
 
+  const chalk = await chalkPromise;
   const packageJson = {
     name: appName,
     version: '1.0.0',
