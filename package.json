@@ -1,6 +1,6 @@
 {
   "name": "create-express-app-js",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "CLI tool for generating modern Express applications",
   "main": "express-app.js",
   "bin": {

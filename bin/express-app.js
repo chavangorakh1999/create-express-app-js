@@ -5,9 +5,6 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-// Use dynamic import for chalk
-const chalkPromise = import('chalk');
-
 program
   .version('1.0.0')
   .description('Generate a new Express application')
@@ -16,12 +13,14 @@ program
   .parse(process.argv);
 
 const run = async () => {
-  let appName = program.name;
-  let appDirectory = program.directory || appName;
+  const { name: appName, directory: appDirectory } = program.opts();
 
+  const inquirer = await import('inquirer');
+  const chalk = await import('chalk');
+
+  let appNamePrompt;
   if (!appName) {
-    const inquirer = await import('inquirer');
-    const { name } = await inquirer.prompt([
+    appNamePrompt = await inquirer.default.prompt([
       {
         type: 'input',
         name: 'name',
@@ -34,15 +33,14 @@ const run = async () => {
         },
       },
     ]);
-    appName = name;
   }
 
-  const templatePath = path.join(__dirname, 'templates');
-  const appPath = path.join(process.cwd(), appDirectory);
+  const name = appNamePrompt?.name || appName;
+  const templatePath = path.join(__dirname, '../templates');
+  const appPath = path.join(process.cwd(), appDirectory || name);
 
   if (fs.existsSync(appPath)) {
-    const chalk = await chalkPromise;
-    console.error(chalk.red(`Error: Directory ${appDirectory} already exists.`));
+    console.error(chalk.default.red(`Error: Directory ${appPath} already exists.`));
     process.exit(1);
   }
 
@@ -63,9 +61,8 @@ const run = async () => {
   copyTemplateFiles(templatePath, appPath);
   process.chdir(appPath);
 
-  const chalk = await chalkPromise;
   const packageJson = {
-    name: appName,
+    name,
     version: '1.0.0',
     description: 'Express application generated with create-express-app-js',
     main: 'index.js',
@@ -82,7 +79,8 @@ const run = async () => {
 
   fs.writeFileSync(path.join(appPath, 'package.json'), JSON.stringify(packageJson, null, 2));
 
-  console.log(chalk.green(`Success! Express application '${appName}' created in '${appDirectory}'`));
+  console.log(chalk.default.green(`Success! Express application '${name}' created in '${appPath}'`));
+  
 };
 
 run();
