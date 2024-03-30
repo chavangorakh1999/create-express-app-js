@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
-import { program } from 'commander';
-import fs from 'fs';
-import path from 'path';
-import { execSync } from 'child_process';
-import chalk from 'chalk';
-import inquirer from 'inquirer';
+const { program } = require('commander');
+const fs = require('fs');
+const path = require('path');
+const { execSync } = require('child_process');
+const chalk = require('chalk');
+const inquirer = require('inquirer');
 
 program
   .version('1.0.0')
