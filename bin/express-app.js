@@ -15,6 +15,15 @@ program
   )
   .parse(process.argv);
 
+// Function to sanitize folder names
+const sanitizeFolderName = (name) => {
+  // Convert to lowercase
+  let sanitized = name.toLowerCase();
+  // Remove special characters except hyphens
+  sanitized = sanitized.replace(/[^a-z0-9-]/g, "");
+  return sanitized;
+};
+
 const run = async () => {
   let appName = process.argv[2];
 
@@ -22,9 +31,16 @@ const run = async () => {
   if (appName === "." && process.argv.length === 3) {
     // Get the base name of the current working directory
     appName = path.basename(process.cwd());
+    // Update appPath to current working directory
+    appPath = process.cwd();
   } else if (!appName || process.argv.length !== 3) {
     console.error("Error: Application name must be provided.");
     process.exit(1);
+  } else {
+    // Sanitize folder name
+    appName = sanitizeFolderName(appName);
+    // Create new directory with sanitized name
+    appPath = path.join(process.cwd(), program.opts().directory || appName);
   }
 
   const inquirer = await import("inquirer");
@@ -41,7 +57,6 @@ const run = async () => {
   const author = authorPrompt.author || "";
 
   const templatePath = path.join(__dirname, "../app_template");
-  const appPath = path.join(process.cwd(), program.opts().directory || appName);
 
   if (fs.existsSync(appPath)) {
     console.error(
@@ -63,7 +78,6 @@ const run = async () => {
     });
   };
 
-  fs.mkdirSync(appPath);
   copyTemplateFiles(templatePath, appPath);
   process.chdir(appPath);
 
