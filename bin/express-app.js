@@ -24,6 +24,22 @@ const sanitizeFolderName = (name) => {
   return sanitized;
 };
 
+const validateFolderName = (name) => {
+  // Ensure the folder name is not empty
+  if (!name) {
+    console.error("Error: Folder name cannot be empty.");
+    return false;
+  }
+  // Ensure the folder name doesn't contain any special characters except hyphens
+  if (!/^[a-z0-9-]+$/.test(name)) {
+    console.error(
+      "Error: Folder name can only contain lowercase letters, numbers, and hyphens."
+    );
+    return false;
+  }
+  return true;
+};
+
 const run = async () => {
   let appName = process.argv[2];
 
@@ -39,8 +55,20 @@ const run = async () => {
   } else {
     // Sanitize folder name
     appName = sanitizeFolderName(appName);
+    // Validate folder name
+    if (!validateFolderName(appName)) {
+      process.exit(1);
+    }
     // Create new directory with sanitized name
     appPath = path.join(process.cwd(), program.opts().directory || appName);
+    
+    // Check if directory already exists (skip if '.' is provided)
+    if (fs.existsSync(appPath) && appName !== '.') {
+      console.error(
+        chalk.default.red(`Error: Directory ${appPath} already exists.`)
+      );
+      process.exit(1);
+    }
   }
 
   const inquirer = await import("inquirer");
@@ -66,6 +94,8 @@ const run = async () => {
   }
 
   const copyTemplateFiles = (source, destination) => {
+    fs.mkdirSync(destination, { recursive: true });
+
     fs.readdirSync(source).forEach((file) => {
       const sourceFile = path.join(source, file);
       const destinationFile = path.join(destination, file);
