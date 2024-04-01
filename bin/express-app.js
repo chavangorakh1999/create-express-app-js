@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-
 const { program } = require("commander");
 const fs = require("fs");
 const path = require("path");
@@ -20,7 +19,7 @@ const sanitizeFolderName = (name) => {
   // Convert to lowercase
   let sanitized = name.toLowerCase();
   // Remove special characters except hyphens
-  sanitized = sanitized.replace(/[^a-z0-9-]/g, "");
+//   sanitized = sanitized.replace(/[^a-z0-9-]/g, "");
   return sanitized;
 };
 
@@ -41,10 +40,14 @@ const validateFolderName = (name) => {
 };
 
 const run = async () => {
-  let appName = process.argv[2];
+  const inquirer = await import("inquirer");
+  const chalk = await import("chalk");
+
+  let nameArg = process.argv[2];
+  let appName=nameArg;
 
   // Check if the first argument is a dot (indicating current directory)
-  if (appName === "." && process.argv.length === 3) {
+  if (nameArg === "." && process.argv.length === 3) {
     // Get the base name of the current working directory
     appName = path.basename(process.cwd());
     // Update appPath to current working directory
@@ -61,18 +64,18 @@ const run = async () => {
     }
     // Create new directory with sanitized name
     appPath = path.join(process.cwd(), program.opts().directory || appName);
-    
-    // Check if directory already exists (skip if '.' is provided)
-    if (fs.existsSync(appPath) && appName !== '.') {
+    if(nameArg === "." && process.argv.length === 3){
+        appPath = path.join(process.cwd(), program.opts().directory);
+    }
+
+    // Check if directory already exists
+    if (fs.existsSync(appPath) && nameArg !== ".") {
       console.error(
         chalk.default.red(`Error: Directory ${appPath} already exists.`)
       );
       process.exit(1);
     }
   }
-
-  const inquirer = await import("inquirer");
-  const chalk = await import("chalk");
 
   const authorPrompt = await inquirer.default.prompt([
     {
@@ -85,13 +88,6 @@ const run = async () => {
   const author = authorPrompt.author || "";
 
   const templatePath = path.join(__dirname, "../app_template");
-
-  if (fs.existsSync(appPath)) {
-    console.error(
-      chalk.default.red(`Error: Directory ${appPath} already exists.`)
-    );
-    process.exit(1);
-  }
 
   const copyTemplateFiles = (source, destination) => {
     fs.mkdirSync(destination, { recursive: true });
