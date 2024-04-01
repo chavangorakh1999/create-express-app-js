@@ -23,6 +23,41 @@ const sanitizeFolderName = (name) => {
   return sanitized;
 };
 
+const generateReadme = async(appName,appPath, author) => {
+    const readmeContent = `# ${appName}
+  
+  This project was bootstrapped with [create-express-app-js](https://github.com/chavangorakh1999/create-express-app-js).
+  
+  ## Available Scripts
+  
+  In the project directory, you can run:
+  
+  ### \`npm start\`
+  
+  Runs the app in development mode.
+  
+  ### \`npm test\`
+  
+  Launches the test runner.
+  
+  ### \`npm run build\`
+  
+  Builds the app for production to the \`build\` folder.
+  
+  ## Learn More
+  
+  To learn more about Express, check out the [Express documentation](https://expressjs.com/).
+  
+  You can also learn more about the [create-express-app-js](https://github.com/yourusername/create-express-app-js) in its GitHub repository.
+  
+  ## Author
+  
+  ${author}
+  `;
+  
+    // Write content to README.md file
+    fs.writeFileSync(path.join(appPath, "README.md"), readmeContent);
+  };
 const validateFolderName = (name) => {
   // Ensure the folder name is not empty
   if (!name) {
@@ -134,6 +169,7 @@ const run = async () => {
     path.join(appPath, "package.json"),
     JSON.stringify(packageJson, null, 2)
   );
+  await generateReadme(appName,appPath, author);
   console.log(
     chalk.default.cyan(`\nExpress application '${appName}' created'`)
   );
